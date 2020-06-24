@@ -6,9 +6,9 @@ from genetic_algorithm.mutation import Mutation
 from genetic_algorithm.evaluate_fitness import EvaluateFitness
 from genetic_algorithm.selection import Selection
 
-obj = QAPObjectiveFunction(dat_file='had20.dat', sln_file='had20.sln')
+obj = TSPObjectiveFunction(num_points=20)
 solution = obj.min_v
-number_of_generations = 30
+number_of_generations = 100
 population_size = 1000
 percent_crossover = 0.6
 percent_mutation = 0.1
