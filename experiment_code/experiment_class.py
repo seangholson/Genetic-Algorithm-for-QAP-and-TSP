@@ -1,27 +1,11 @@
 # Built-ins:
 from datetime import datetime
 
+
 # Installed packages:
 
 # Project locals:
-from solvers.solvers import LocalQUBOIterativeSolver
-
-
-# These are this list of valid solver types:
-solver_types = [
-    'LQUBO',
-    'LQUBO WP',
-    'LQUBO WS',
-    'LQUBO WP and WS',
-    'Rand Slice LQUBO',
-    'Rand Slice LQUBO WS',
-    'Rand Slice LQUBO WP',
-    'Rand Slice LQUBO WP and WS',
-    'HD Slice LQUBO',
-    'HD Slice LQUBO WS',
-    'HD Slice LQUBO WP',
-    'HD Slice LQUBO WP and WS',
-]
+from genetic_algorithm.genetic_algorithm import GeneticAlgorithm
 
 # These are the valid experiment types:
 experiment_types = [
@@ -29,31 +13,23 @@ experiment_types = [
     'iter_lim',
 ]
 
-# These are the valid D-Wave sampler types:
-sampler_types = [
-    'SA',
-    'QPU',
-    'Tabu',
-]
 
-
-class Experiment:
+class GAExperiment:
     """
     This class is designed to run multiple trials of a solver for a
     specified QAP/ TSP and collect data.
     """
     def __init__(self,
                  save_csv=None,
-                 max_hd=None,
                  instance=None,
                  size=None,
+                 population_size=None,
+                 pct_crossover=None,
+                 pct_mutation=None,
                  problem_type=None,
                  objective_function=None,
                  num_trials=None,
-                 num_reads=None,
                  num_iters=None,
-                 solver=None,
-                 sampler_type=None,
                  experiment_type=None):
 
         # Initialize objective function
@@ -69,45 +45,32 @@ class Experiment:
         else:
             self.num_trials = 10
 
+        if num_iters:
+            self.num_iters = num_iters
+        else:
+            self.num_iters = 10
+
         self.instance = instance
         self.problem_type = problem_type
         self.size = size
         self.save_csv = save_csv
+        self.solver_str = 'Genetic Algorithm'
 
-        # Initialize solver based on type of experiment and sampler and/ or penalty if necessary
-        if solver not in solver_types:
-            err_msg = f'Solver {solver} must be one of {solver_types}'
-            raise ValueError(err_msg)
-
-        if experiment_type not in experiment_types:
-            err_msg = f'Experiment {experiment_type} must be one of {experiment_types}'
-            raise ValueError(err_msg)
-
-        if sampler_type not in sampler_types:
-            err_msg = f'Sampler {sampler_type} must be one of {sampler_types}'
-            raise ValueError(err_msg)
-
-        self.solver_str = solver
-        self.experiment_str = experiment_type
-        self.sampler_str = sampler_type
-
-        if 'WS' in self.solver_str:
-            selection_type = 'check and select'
+        if experiment_type in experiment_types:
+            self.experiment_str = experiment_type
         else:
-            selection_type = 'select'
+            raise AttributeError('Invalid experiment type')
 
-        self.solver = LocalQUBOIterativeSolver(objective_function=objective_function,
-                                               dwave_sampler=sampler_type,
-                                               lqubo_type=self.solver_str,
-                                               selection_type=selection_type,
-                                               max_hd=max_hd,
-                                               experiment_type=experiment_type,
-                                               num_reads=num_reads,
-                                               num_iters=num_iters)
+        self.solver = GeneticAlgorithm(objective_function=self.objective_function,
+                                       experiment_type=self.experiment_str,
+                                       population_size=population_size,
+                                       pct_mutation=pct_mutation,
+                                       pct_crossover=pct_crossover,
+                                       num_iters=self.num_iters)
 
     def run_experiment(self):
         results = dict()
-        main_key = 'solver, size, experiment type, problem type, instance, answer'
+        main_key = 'solver, size, experiment type, problem type, instance, save_csv bool, answer'
         results[main_key] = [self.solver_str,
                              self.size,
                              self.experiment_str,
@@ -120,7 +83,7 @@ class Experiment:
         results['obtain_optimal'] = []
         results['timing_code'] = []
         results['number_of_iterations'] = []
-        results['v_vec'] = []
+        results['max_fitness_array'] = []
 
         for trial in range(self.num_trials):
             t = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -138,7 +101,7 @@ class Experiment:
             results['timing_code'].append(solver_ans[3])
             results['number_of_iterations'].append(solver_ans[4])
             results['trial_{}_data_dict'.format(trial + 1)] = solver_ans[5]
-            results['v_vec'].append(solver_ans[6])
+            results['max_fitness_array'].append(solver_ans[6])
 
         t = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         f = self.objective_function.dat_file

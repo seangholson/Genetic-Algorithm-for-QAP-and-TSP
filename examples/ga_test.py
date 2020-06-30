@@ -1,50 +1,25 @@
 from utilities.objective_functions import QAPObjectiveFunction, TSPObjectiveFunction
-from switch_networks.switch_networks import PermutationNetwork, SortingNetwork
-from genetic_algorithm.initialize_population import InitialPopulation
-from genetic_algorithm.crossover import Crossover
-from genetic_algorithm.mutation import Mutation
-from genetic_algorithm.evaluate_fitness import EvaluateFitness
-from genetic_algorithm.selection import Selection
+from genetic_algorithm.genetic_algorithm import GeneticAlgorithm
 
 obj = TSPObjectiveFunction(num_points=20)
 solution = obj.min_v
-number_of_generations = 100
+number_of_generations = 50
 population_size = 1000
 percent_crossover = 0.6
 percent_mutation = 0.1
 
-s = SortingNetwork(obj.n)
-p = PermutationNetwork(obj.n)
-if s.depth <= p.depth:
-    network = s
-else:
-    network = p
+GA = GeneticAlgorithm(objective_function=obj,
+                      experiment_type='iter_lim',
+                      population_size=population_size,
+                      pct_crossover=percent_crossover,
+                      pct_mutation=percent_mutation,
+                      num_iters=number_of_generations)
 
-population = InitialPopulation(objective_function=obj,
-                               network=network,
-                               population_size=population_size).generate_initial_population()
-max_fitness = []
+GA_response = GA.minimize_objective()
 
-for _ in range(number_of_generations):
-
-    crossover_offspring = Crossover(population=population, percent_crossover=percent_crossover).perform_crossover()
-    mutated_offspring = Mutation(population=population, percent_mutate=percent_mutation).perform_mutation()
-
-    evaluation = EvaluateFitness(input_population=population,
-                                 mutated_offspring=mutated_offspring,
-                                 crossover_offspring=crossover_offspring,
-                                 objective_function=obj,
-                                 network=network).evaluate_population_fitness()
-
-    max_fitness.append(evaluation[0][0])
-    population = Selection(population_size=population_size, population_fitness=evaluation).select_chromosomes()
-
-    print('Max Fitness: {}'.format(evaluation[0][0]))
-
-ga_answer = min(max_fitness)
-percent_error = (abs(ga_answer - solution)/solution)*100
-print('Final Answer: {}'.format(ga_answer))
-print('Percent Error: {}'.format(percent_error))
+print("GA answer: {}".format(GA_response[0]))
+print("Percent Error: {}".format(GA_response[1]))
+print("Timing of code: {}".format(GA_response[3]))
 
 
 

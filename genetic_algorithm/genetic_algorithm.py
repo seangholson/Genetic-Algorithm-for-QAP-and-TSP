@@ -125,7 +125,7 @@ class GeneticAlgorithm(Solver):
         timing_code = end_code - start_code
 
         ga_ans = min(data_dict['max_fitness'])
-        num_iters = len(data_dict['v_vec']) - 1
+        num_iters = len(data_dict['max_fitness'])
 
         if ga_ans == self.solution:
             obtain_optimal = 1
@@ -134,5 +134,5 @@ class GeneticAlgorithm(Solver):
             percent_error = abs(self.solution - ga_ans) / self.solution * 100
             obtain_optimal = 0
 
-        return ga_ans, percent_error, obtain_optimal, timing_code, num_iters, data_dict
+        return ga_ans, percent_error, obtain_optimal, timing_code, num_iters, data_dict, data_dict['max_fitness']
 
