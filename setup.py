@@ -37,12 +37,11 @@ setup(
     },
     packages=[
         'experiment_code',
-        'form_LQUBO',
-        'quality_of_LQUBO_and_methods',
-        'response_selection',
-        'solvers',
+        'data',
+        'examples',
+        'experiment_code',
+        'genetic_algorithm',
         'switch_networks',
-        'tabu_experiment',
         'utilities',
     ],
     python_requires='>=3.5, <4',
@@ -50,5 +49,5 @@ setup(
         'numpy',
 	    'pandas',
 	    'matplotlib'
-        ],
+    ],
 )
