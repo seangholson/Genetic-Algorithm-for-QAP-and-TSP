@@ -3,17 +3,12 @@ import numpy as np
 
 class InitialPopulation:
 
-    def __init__(self, objective_function=None, network=None, population_size=None):
+    def __init__(self, objective_function=None, population_size=None):
 
         if objective_function:
             self.objective_function = objective_function
         else:
             raise TypeError('Objective Function Missing')
-
-        if network:
-            self.network = network
-        else:
-            raise TypeError('Network Missing')
 
         self.population_size = population_size
 
@@ -21,7 +16,7 @@ class InitialPopulation:
 
         population = []
         for _ in range(self.population_size):
-            rand_chromosome = np.random.randint(0, 2, size=self.network.depth)
+            rand_chromosome = np.random.permutation(self.objective_function.n)
             population.append(rand_chromosome)
 
         return population

@@ -1,10 +1,8 @@
 import time
-from switch_networks.switch_networks import PermutationNetwork, SortingNetwork
 from genetic_algorithm.initialize_population import InitialPopulation
 from genetic_algorithm.crossover import Crossover
 from genetic_algorithm.mutation import Mutation
-from genetic_algorithm.evaluate_fitness import EvaluateFitness
-from genetic_algorithm.selection import Selection
+from genetic_algorithm.selection import TournamentSelection
 
 
 class Solver:
@@ -32,8 +30,7 @@ class GeneticAlgorithm(Solver):
                  population_size=None,
                  pct_crossover=None,
                  pct_mutation=None,
-                 num_iters=None,
-                 network_type='minimum'):
+                 num_iters=None):
         super().__init__(objective_function=objective_function)
 
         if population_size:
@@ -51,24 +48,9 @@ class GeneticAlgorithm(Solver):
         else:
             self.pct_mutation = 0.2
 
-        # Initialize switch network:
         # The default behavior here is to choose the smaller of either permutation or
         # sorting networks for the given input size.
         self.n_obj = self.objective_function.n
-        if network_type == 'sorting':
-            self.network = SortingNetwork(self.n_obj)
-        elif network_type == 'permutation':
-            self.network = PermutationNetwork(self.n_obj)
-        elif network_type == 'minimum':
-            s = SortingNetwork(self.n_obj)
-            p = PermutationNetwork(self.n_obj)
-            if s.depth <= p.depth:
-                self.network = s
-            else:
-                self.network = p
-        else:
-            raise TypeError('Network type {} not recognized'.format(str(network_type)))
-
         self.stopwatch = 0
 
         # Initialize type of experiment
@@ -92,9 +74,9 @@ class GeneticAlgorithm(Solver):
 
         data_dict = dict()
         data_dict['max_fitness'] = []
+        data_dict['max_fitness_chromosome'] = []
 
         population = InitialPopulation(objective_function=self.objective_function,
-                                       network=self.network,
                                        population_size=self.population_size).generate_initial_population()
 
         for iteration in range(self.n_iters):
@@ -107,16 +89,24 @@ class GeneticAlgorithm(Solver):
                                             percent_crossover=self.pct_crossover).perform_crossover()
             mutated_offspring = Mutation(population=population, percent_mutate=self.pct_mutation).perform_mutation()
 
-            evaluation = EvaluateFitness(input_population=population,
-                                         mutated_offspring=mutated_offspring,
-                                         crossover_offspring=crossover_offspring,
-                                         objective_function=self.objective_function,
-                                         network=self.network).evaluate_population_fitness()
+            selection = TournamentSelection(final_population_size=self.population_size,
+                                            input_population=population,
+                                            mutated_offspring=mutated_offspring,
+                                            crossover_offspring=crossover_offspring,
+                                            objective_function=self.objective_function)
 
-            data_dict['max_fitness'].append(evaluation[0][0])
+            population = selection.select_chromosomes()
+            fitness = selection.chromosome_fitness(population)
+            max_fitness = min(fitness)
+            max_fit_chromosome = population[fitness.index(max_fitness)]
 
-            population = Selection(population_size=self.population_size,
-                                   population_fitness=evaluation).select_chromosomes()
+            data_dict['max_fitness'].append(max_fitness)
+            data_dict['max_fitness_chromosome'].append(max_fit_chromosome)
+
+            print("")
+            print("Generation {}".format(iteration + 1))
+            print("Max fitness: {}".format(max_fitness))
+            print("Max fitness_chromosome: {}".format(max_fit_chromosome))
 
             end_iteration = time.time()
             self.stopwatch += end_iteration - start_iteration
@@ -127,12 +117,7 @@ class GeneticAlgorithm(Solver):
         ga_ans = min(data_dict['max_fitness'])
         num_iters = len(data_dict['max_fitness'])
 
-        if ga_ans == self.solution:
-            obtain_optimal = 1
-            percent_error = 0
-        else:
-            percent_error = abs(self.solution - ga_ans) / self.solution * 100
-            obtain_optimal = 0
+        percent_error = abs(self.solution - ga_ans) / self.solution * 100
 
-        return ga_ans, percent_error, obtain_optimal, timing_code, num_iters, data_dict, data_dict['max_fitness']
+        return ga_ans, percent_error, timing_code, num_iters, data_dict, data_dict['max_fitness']
 

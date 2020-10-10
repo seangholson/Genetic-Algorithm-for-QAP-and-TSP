@@ -17,24 +17,46 @@ class Crossover:
             raise TypeError('Percent Crossover Missing')
 
     @staticmethod
-    def single_point_crossover(parent1, parent2):
+    def ordered_crossover(parent1, parent2):
 
         """
-        A single point crossover will pick a random point in in the chromosomes of the two parents and split each
-        chromosome into two parts.  Then the children's chromosomes are made by combining the parts of the two parents
-        chromosomes.
+        An ordered crossover will take a segment of the two parents chromosomes (permutations) and swap them while
+        preserving the relative ordering of the parents as much as possible.
         """
+        n_obj = len(parent1)
+        crossover_index_start = np.random.randint(1, n_obj)
 
-        crossover_index = np.random.randint(0, len(parent1))
+        p1_copy = parent1.copy()
+        p2_copy = parent2.copy()
 
-        parent1_gene_a = parent1[crossover_index:]
-        parent2_gene_a = parent2[crossover_index:]
+        child1 = []
+        child2 = []
+        for i in range(n_obj):
+            child1.append('None')
+            child2.append('None')
 
-        parent1_gene_b = parent1[:crossover_index]
-        parent2_gene_b = parent2[:crossover_index]
+        for i in range(crossover_index_start, n_obj):
+            child1[i] = parent2[i]
+            child2[i] = parent1[i]
 
-        child1 = [*parent1_gene_a, *parent2_gene_b]
-        child2 = [*parent2_gene_a, *parent1_gene_b]
+        # Remove values from parent (copy) that already exist in children
+        for val in child1:
+            if val != 'None':
+                p1_copy = np.delete(p1_copy, np.where(p1_copy == val))
+
+        for val in child2:
+            if val != 'None':
+                p2_copy = np.delete(p2_copy, np.where(p2_copy == val))
+
+        j = 0
+        k = 0
+        for i in range(n_obj):
+            if child1[i] == 'None':
+                child1[i] = p1_copy[j]
+                j = j + 1
+            if child2[i] == 'None':
+                child2[i] = p2_copy[k]
+                k = k + 1
 
         return child1, child2
 
@@ -49,7 +71,7 @@ class Crossover:
             parent1 = self.population[np.random.randint(0, len(self.population))]
             parent2 = self.population[np.random.randint(0, len(self.population))]
 
-            child1, child2 = self.single_point_crossover(parent1=parent1, parent2=parent2)
+            child1, child2 = self.ordered_crossover(parent1=parent1, parent2=parent2)
 
             crossover_offspring.append(child1)
             crossover_offspring.append(child2)
