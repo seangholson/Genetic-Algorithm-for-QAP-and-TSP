@@ -26,7 +26,7 @@ def parse_sln_file(sln_file):
         n, v = [int(element) for element in line_1.split(' ') if element != '']
         line_2 = file.readline()
         assert isinstance(line_2, str)
-        p = [int(element) for element in line_2.split(' ') if element != '']
+        p = [int(element) for element in line_2.split(' ') if element not in ['', '\n']]
     return n, v, p
 
 

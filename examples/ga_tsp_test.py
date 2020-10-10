@@ -1,4 +1,4 @@
-from utilities.objective_functions import QAPObjectiveFunction, TSPObjectiveFunction
+from utilities.objective_functions import TSPObjectiveFunction
 from genetic_algorithm.genetic_algorithm import GeneticAlgorithm
 
 obj = TSPObjectiveFunction(num_points=20)
@@ -17,9 +17,11 @@ GA = GeneticAlgorithm(objective_function=obj,
 
 GA_response = GA.minimize_objective()
 
+print("")
 print("GA answer: {}".format(GA_response[0]))
 print("Percent Error: {}".format(GA_response[1]))
-print("Timing of code: {}".format(GA_response[3]))
+print("Timing of code: {}".format(GA_response[2]))
+print("Correct answer: {}".format(solution))
 
 
 

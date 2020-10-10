@@ -17,15 +17,13 @@ class Mutation:
             raise TypeError('Percent Crossover Missing')
 
     @staticmethod
-    def point_mutation(parent):
+    def swap_mutation(parent):
 
-        # Pick a random gene to mutate
-        random_gene = np.random.randint(0, len(parent))
+        # Pick 2 random points to swap
+        random_gene_loc1 = np.random.randint(0, len(parent))
+        random_gene_loc2 = np.random.randint(0, len(parent))
 
-        if parent[random_gene] == 0:
-            parent[random_gene] = 1
-        else:
-            parent[random_gene] = 0
+        parent[random_gene_loc1], parent[random_gene_loc2] = parent[random_gene_loc2], parent[random_gene_loc1]
 
         return parent
 
@@ -39,7 +37,7 @@ class Mutation:
             # Generate a random parent
             rand_parent = self.population[np.random.randint(0, len(self.population))]
 
-            mutated_child = self.point_mutation(rand_parent)
+            mutated_child = self.swap_mutation(rand_parent)
             mutation_offspring.append(mutated_child)
 
         return mutation_offspring

@@ -13,7 +13,7 @@ setup(
     description='A genetic algorithm for QAP and TSP using a sorting network encoding',
     long_description=readme,
     long_description_content_type='test/markdown',
-    url='git@github.com:seangholson/lqubo.git',
+    url='git@github.com:seangholson/Genetic-Algorithm-for-QAP-and-TSP.git',
     author='Sean Gholson, Group W, Inc.',
     author_email='sgholson@groupw.com',
     license='Apache Software License',
@@ -28,7 +28,7 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Scientific/Engineering :: Physics',
     ],
-    keywords='quantum computing hybrid algorithm',
+    keywords='Genetic Algorithm',
     project_urls={
         'Documentation': 'git@github.com:seangholson/Genetic-Algorithm-for-QAP-and-TSP.git',
         'Source': 'git@github.com:seangholson/Genetic-Algorithm-for-QAP-and-TSP.git',
@@ -36,18 +36,14 @@ setup(
         'Say hi!': 'mailto:sgholson@groupw.com',
     },
     packages=[
-        'experiment_code',
         'data',
         'examples',
-        'experiment_code',
         'genetic_algorithm',
-        'switch_networks',
         'utilities',
     ],
     python_requires='>=3.5, <4',
     install_requires=[
         'numpy',
-	    'pandas',
-	    'matplotlib'
+        'pandas'
     ],
 )
