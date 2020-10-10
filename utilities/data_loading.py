@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-# Working directory should always be /lqubo/
+# Working directory should always be Genetic-Algorithm-for-QAP-and-TSP/
 
 dat_path = 'data/dat'
 sln_path = 'data/sln'
